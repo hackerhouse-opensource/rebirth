@@ -1,0 +1,144 @@
+/*
+ * Copyright (C) 2015-2016 Ole André Vadla Ravnås <oleavr@nowsecure.com>
+ *
+ * Licence: wxWindows Library Licence, Version 3.1
+ */
+
+#ifndef __GUM_EXCEPTOR_H__
+#define __GUM_EXCEPTOR_H__
+
+#include <glib-object.h>
+#include <gum/gummemory.h>
+#include <gum/gumprocess.h>
+#include <setjmp.h>
+
+#define GUM_TYPE_EXCEPTOR (gum_exceptor_get_type ())
+#define GUM_EXCEPTOR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj),\
+    GUM_TYPE_EXCEPTOR, GumExceptor))
+#define GUM_EXCEPTOR_CAST(obj) ((GumExceptor *) (obj))
+#define GUM_EXCEPTOR_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass),\
+    GUM_TYPE_EXCEPTOR, GumExceptorClass))
+#define GUM_IS_EXCEPTOR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj),\
+    GUM_TYPE_EXCEPTOR))
+#define GUM_IS_EXCEPTOR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE (\
+    (klass), GUM_TYPE_EXCEPTOR))
+#define GUM_EXCEPTOR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS (\
+    (obj), GUM_TYPE_EXCEPTOR, GumExceptorClass))
+
+G_BEGIN_DECLS
+
+#if defined (G_OS_WIN32) || defined (__APPLE__)
+# define GUM_NATIVE_SETJMP(env) setjmp (env)
+# define GUM_NATIVE_LONGJMP longjmp
+  typedef jmp_buf GumExceptorNativeJmpBuf;
+#else
+# define GUM_NATIVE_SETJMP(env) sigsetjmp (env, TRUE)
+# define GUM_NATIVE_LONGJMP siglongjmp
+  typedef sigjmp_buf GumExceptorNativeJmpBuf;
+#endif
+
+typedef struct _GumExceptor GumExceptor;
+typedef struct _GumExceptorClass GumExceptorClass;
+typedef struct _GumExceptorPrivate GumExceptorPrivate;
+
+typedef struct _GumExceptionDetails GumExceptionDetails;
+typedef guint GumExceptionType;
+typedef struct _GumExceptionMemoryDetails GumExceptionMemoryDetails;
+typedef gboolean (* GumExceptionHandler) (GumExceptionDetails * details,
+    gpointer user_data);
+
+typedef struct _GumExceptorScope GumExceptorScope;
+
+struct _GumExceptor
+{
+  GObject parent;
+
+  GumExceptorPrivate * priv;
+};
+
+struct _GumExceptorClass
+{
+  GObjectClass parent_class;
+};
+
+enum _GumExceptionType
+{
+  GUM_EXCEPTION_ABORT = 1,
+  GUM_EXCEPTION_ACCESS_VIOLATION,
+  GUM_EXCEPTION_GUARD_PAGE,
+  GUM_EXCEPTION_ILLEGAL_INSTRUCTION,
+  GUM_EXCEPTION_STACK_OVERFLOW,
+  GUM_EXCEPTION_ARITHMETIC,
+  GUM_EXCEPTION_BREAKPOINT,
+  GUM_EXCEPTION_SINGLE_STEP,
+  GUM_EXCEPTION_SYSTEM
+};
+
+struct _GumExceptionMemoryDetails
+{
+  GumMemoryOperation operation;
+  gpointer address;
+};
+
+struct _GumExceptionDetails
+{
+  GumThreadId thread_id;
+  GumExceptionType type;
+  gpointer address;
+  GumExceptionMemoryDetails memory;
+  GumCpuContext context;
+  gpointer native_context;
+};
+
+struct _GumExceptorScope
+{
+  GumExceptionDetails exception;
+
+  /*< private */
+  gboolean exception_occurred;
+  gpointer padding[2];
+  jmp_buf env;
+#ifdef __ANDROID__
+  sigset_t mask;
+#endif
+
+  GumExceptorScope * next;
+};
+
+GUM_API GType gum_exceptor_get_type (void) G_GNUC_CONST;
+
+GUM_API GumExceptor * gum_exceptor_obtain (void);
+
+GUM_API void gum_exceptor_add (GumExceptor * self, GumExceptionHandler func,
+    gpointer user_data);
+GUM_API void gum_exceptor_remove (GumExceptor * self, GumExceptionHandler func,
+    gpointer user_data);
+
+#if defined (_MSC_VER) && GLIB_SIZEOF_VOID_P == 8
+/*
+ * On MSVC/64-bit setjmp() is actually an intrinsic that calls _setjmp() with a
+ * a hidden second argument specifying the frame pointer. This makes sense when
+ * the longjmp() is guaranteed to happen from code we control, but is not
+ * reliable otherwise.
+ */
+# define gum_exceptor_try(self, scope) \
+    _gum_exceptor_prepare_try (self, scope), \
+    ((int (*) (jmp_buf env, void * frame_pointer)) _setjmp) ( \
+        (scope)->env, NULL) == 0
+#else
+# define gum_exceptor_try(self, scope) \
+    _gum_exceptor_prepare_try (self, scope), \
+    GUM_NATIVE_SETJMP ((scope)->env) == 0
+#endif
+GUM_API gboolean gum_exceptor_catch (GumExceptor * self,
+    GumExceptorScope * scope);
+
+GUM_API gchar * gum_exception_details_to_string (
+    const GumExceptionDetails * details);
+
+GUM_API void _gum_exceptor_prepare_try (GumExceptor * self,
+    GumExceptorScope * scope);
+
+G_END_DECLS
+
+#endif

@@ -1,0 +1,11 @@
+prefix=/Users/cryptodash/Work/rebirth/frida/build/frida_thin-ios-arm64
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: GumJS
+Description: Gum JavaScript bindings
+Version: 1.0.0
+Requires: frida-gum-1.0, json-glib-1.0
+Requires.private: glib-2.0 >= 2.53, gobject-2.0, gio-2.0, capstone, libffi, gio-unix-2.0
+Libs: -L${libdir} -lfrida-gumjs-1.0
+Cflags: -I${includedir}/frida-1.0

@@ -1,0 +1,11 @@
+prefix=/Users/cryptodash/Work/rebirth/frida/build/frida_thin-ios-arm64
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: GumProf
+Description: Profiling library built on top of Gum
+Version: 1.0.0
+Requires: frida-gum-1.0
+Requires.private: glib-2.0 >= 2.53, gobject-2.0, gio-2.0, capstone
+Libs: -L${libdir} -lfrida-gum-prof-1.0
+Cflags: -I${includedir}/frida-1.0

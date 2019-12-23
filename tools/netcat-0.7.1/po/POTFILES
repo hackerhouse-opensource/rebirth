@@ -1,0 +1,7 @@
+     ../src/core.c \
+     ../src/flagset.c \
+     ../src/misc.c \
+     ../src/netcat.c \
+     ../src/network.c \
+     ../src/telnet.c \
+     ../src/udphelper.c

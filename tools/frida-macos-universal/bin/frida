@@ -1,0 +1,10 @@
+#!/usr/local/bin/python
+
+from os.path import dirname, join, realpath
+import sys
+sys.path.insert(1, join(dirname(dirname(realpath(__file__))), 'lib/python2.7/site-packages'))
+
+import frida.repl
+
+if __name__ == '__main__':
+    frida.repl.main()

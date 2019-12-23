@@ -1,0 +1,58 @@
+int _main() {
+    r29 = &saved_fp;
+    r31 = r31 + 0xffffffffffffffb0 - 0x430;
+    r20 = *___stack_chk_guard;
+    r20 = *r20;
+    var_48 = r20;
+    if (fork() == 0x0) goto loc_100007b10;
+
+loc_100007b08:
+    r0 = 0x0;
+    goto loc_100007d0c;
+
+loc_100007d0c:
+    if (r20 != var_48) {
+            r0 = __stack_chk_fail();
+    }
+    return r0;
+
+loc_100007b10:
+    r0 = open("/dev/tty.debug-console", 0x20882);
+    r19 = r0;
+    if ((r19 & 0xffffffff80000000) != 0x0) goto loc_100007d08;
+
+loc_100007b2c:
+    _set_interface_attribs(r19, 0x1c200);
+    memset(&stack[-1112], 0x0, 0x48);
+    r0 = tcgetattr(r19, &stack[-1112]);
+    if (r0 == 0x0) {
+            tcsetattr(r19, 0x0, &stack[-1112]);
+    }
+    write(r19, "\r\n\r\n == serialsh (c) 2016 qwertyoruiop == \n\r\n\r", 0x2e);
+    pipe(0x1000080b8);
+    pipe(0x1000080c0);
+    dup2(*(int32_t *)0x1000080c0, 0x0);
+    dup2(*(int32_t *)0x1000080bc, 0x1);
+    dup2(*(int32_t *)0x1000080bc, 0x2);
+    r0 = kqueue();
+    *(int32_t *)0x1000080b4 = r0;
+    if (r0 != -0x1) {
+            r21 = 0x1000080c0;
+            asm { sxtw       x21, w19 };
+            var_468 = r21;
+            kevent(r0, &var_468, 0x1, 0x0, var_470, var_468);
+            var_468 = 0x0;
+            kevent(*(int32_t *)(r20 + 0xb4), &var_468, 0x1, 0x0, var_470, var_468);
+            _spawnproc();
+            r0 = sub_100007c7c();
+    }
+    else {
+            r0 = __assert_rtn("main", "main.m", 0x71, "kq != -1");
+    }
+    return r0;
+
+loc_100007d08:
+    asm { movn       w0, #0x0 };
+    goto loc_100007d0c;
+}
+

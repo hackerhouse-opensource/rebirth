@@ -1,0 +1,8 @@
+Name: capstone
+Description: Capstone disassembly engine
+Version: 3.0.5
+libdir=/Users/cryptodash/Work/rebirth/frida/build/frida_thin-ios-arm64/lib
+includedir=/Users/cryptodash/Work/rebirth/frida/build/frida_thin-ios-arm64/include/capstone
+archive=${libdir}/libcapstone.a
+Libs: -L${libdir} -lcapstone
+Cflags: -I${includedir}

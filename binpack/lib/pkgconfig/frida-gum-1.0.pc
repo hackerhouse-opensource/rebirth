@@ -1,0 +1,11 @@
+prefix=/Users/cryptodash/Work/rebirth/frida/build/frida_thin-ios-arm64
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: Gum
+Description: Low-level code instrumentation library
+Version: 1.0.0
+Requires: glib-2.0 >= 2.53, gobject-2.0, gio-2.0, capstone
+Requires.private: libffi
+Libs: -L${libdir} -lfrida-gum-1.0
+Cflags: -I${includedir}/frida-1.0

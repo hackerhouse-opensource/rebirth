@@ -1,0 +1,10 @@
+prefix=/Users/cryptodash/Work/rebirth/frida/build/frida_thin-ios-arm64
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: Gum++
+Description: Gum C++ bindings
+Version: 1.0.0
+Requires.private: frida-gum-1.0
+Libs: -L${libdir} -lfrida-gumpp-1.0
+Cflags: -I${includedir}/frida-1.0
