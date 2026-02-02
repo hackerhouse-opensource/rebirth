@@ -25,3 +25,7 @@ iPad mini 3, iPad mini4 and iPod touch (6th generation).
 # Acknowledgements
 Hacker House credits Ian Beer for the multipath exploit, jakeajames for his rootless SSH concept
 and Johnathan Levin for the QiLin framework & OS binpack. 
+
+# License
+
+These files are available under the 3-clause BSD license.
